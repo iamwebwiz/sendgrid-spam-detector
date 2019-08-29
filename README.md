@@ -40,4 +40,4 @@ Run the app
 npm run app:start
 ```
 
-Launch Postman and fire up a `POST` request to http://localhost:<port>/sendmail/sendgrid
+Launch Postman and fire up a `POST` request to http://localhost:{PORT}/sendmail/sendgrid
