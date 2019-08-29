@@ -4,12 +4,14 @@ const faker = require("faker");
 const http = require("https");
 const app = express();
 require("dotenv").config();
-const port = process.env.APP_PORT || 3000;
+const port = process.env.APP_PORT || 4000;
 
+// Serve app on port
 app.listen(port, () => {
   console.log(`Listening at port ${port}`);
 });
 
+// Set sendgrid api key
 sendgrid.setApiKey(process.env.SENDGRID_API_KEY);
 
 // parse application/x-www-form-urlencoded
@@ -25,6 +27,7 @@ app.use(express.json());
  */
 function sendMail(emailAddress) {
   app.post("/sendmail/sendgrid", (req, res) => {
+    // configure message to send
     const message = {
       to: emailAddress,
       from: {
@@ -35,16 +38,18 @@ function sendMail(emailAddress) {
       content: [{ type: "text/html", value: faker.lorem.paragraph() }],
       mail_settings: {
         spam_check: {
-          enable: false,
+          enable: true,
           threshold: 10,
-          post_to_url: ""
+          post_to_url: `http://localhost:${port}`
         }
       }
     };
 
+    // Send message to email address
     sendgrid
       .send(message)
       .then(() => {
+        // get spam reports
         let spamReports = checkSpamReports(emailAddress);
 
         res.json({
@@ -78,6 +83,7 @@ const checkSpamReports = email => {
     }
   };
 
+  // make request
   let req = http.request(options, function(res) {
     let chunks = [];
 
