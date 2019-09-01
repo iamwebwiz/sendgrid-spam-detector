@@ -1,9 +1,9 @@
-const express = require("express");
-const sendgrid = require("@sendgrid/mail");
-const faker = require("faker");
-const http = require("https");
+const express = require('express');
+const sendgrid = require('@sendgrid/mail');
+const faker = require('faker');
+const http = require('https');
 const app = express();
-require("dotenv").config();
+require('dotenv').config();
 const port = process.env.APP_PORT || 4000;
 
 // Serve app on port
@@ -15,7 +15,7 @@ app.listen(port, () => {
 sendgrid.setApiKey(process.env.SENDGRID_API_KEY);
 
 // parse application/x-www-form-urlencoded
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({extended: false}));
 
 // parse application/json
 app.use(express.json());
@@ -26,23 +26,23 @@ app.use(express.json());
  * @param {string} emailAddress
  */
 function sendMail(emailAddress) {
-  app.post("/sendmail/sendgrid", (req, res) => {
+  app.post('/sendmail/sendgrid', (req, res) => {
     // configure message to send
     const message = {
       to: emailAddress,
       from: {
         email: process.env.MAIL_FROM_ADDRESS,
-        name: process.env.MAIL_FROM_NAME
+        name: process.env.MAIL_FROM_NAME,
       },
       subject: faker.lorem.sentence(),
-      content: [{ type: "text/html", value: faker.lorem.paragraph() }],
+      content: [{type: 'text/html', value: faker.lorem.paragraph()}],
       mail_settings: {
         spam_check: {
           enable: true,
           threshold: 10,
-          post_to_url: `http://localhost:${port}`
-        }
-      }
+          post_to_url: `http://localhost:${port}`,
+        },
+      },
     };
 
     // Send message to email address
@@ -53,15 +53,15 @@ function sendMail(emailAddress) {
         let spamReports = checkSpamReports(emailAddress);
 
         res.json({
-          status: "success",
-          message: "Message sent successfully",
+          status: 'success',
+          message: 'Message sent successfully',
           recipient: message.to,
-          spam_reports: spamReports > 0 ? spamReports : "no spam reports"
+          spam_reports: spamReports > 0 ? spamReports : 'no spam reports',
         });
       })
       .catch(err => {
         res.json({
-          error: err
+          error: err,
         });
       });
   });
@@ -74,30 +74,29 @@ function sendMail(emailAddress) {
  */
 const checkSpamReports = email => {
   let options = {
-    method: "GET",
-    hostname: "api.sendgrid.com",
+    method: 'GET',
+    hostname: 'api.sendgrid.com',
     port: null,
     path: `/v3/suppression/spam_reports/${email}`,
     headers: {
-      authorization: `Bearer ${process.env.SENDGRID_API_KEY}`
-    }
+      authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
+    },
   };
 
   // make request
-  let req = http.request(options, function(res) {
+  let req = http.request(options, function (res) {
     let chunks = [];
 
-    res.on("data", function(chunk) {
+    res.on('data', function (chunk) {
       chunks.push(chunk);
     });
 
-    res.on("end", function() {
-      let body = Buffer.concat(chunks);
-      return body;
+    res.on('end', function () {
+      return Buffer.concat(chunks);
     });
   });
 
-  req.write("{}");
+  req.write('{}');
   req.end();
 };
 
